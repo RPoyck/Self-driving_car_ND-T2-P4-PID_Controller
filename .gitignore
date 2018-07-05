@@ -2,3 +2,6 @@
 build
 tags
 .editorconfig
+
+# KDevelop IDE stuff
+*.kdev4
