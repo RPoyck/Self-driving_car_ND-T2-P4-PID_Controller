@@ -32,19 +32,24 @@ int main()
 {
   uWS::Hub h;
   // initiate PID controller with twiddle algorithm //
-  PID pid(true);
+//   PID pid(true);
 //   // initiate PID controller without twiddle algorithm //
-//   PID pid(false);
+  PID pid(false);
   // TODO: Initialize the pid variable.
-//   pid.with_twiddle = true;
 //   pid.Init(0.1, 0.1, 0.1);
-  pid.Init(0.0, 0.0, 0.0);
+//   pid.Init(0.0, 0.0, 0.0);
+//   pid.Init(0.05, 0.0, 0.0);
+//   pid.Init(0.15, 0.0, 0.0);
+//   pid.Init(0.116, 0.01, 0.0025);
+//   pid.Init(0.116, 0.001, 0.00025);
+//   pid.Init(0.116, 0.001, 0.3);
+  pid.Init(0.1241, 0.00027, 0.39);
 //   pid.Init(0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0);
   
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // TODO remove this //
-    double speed_max = 5.0;
+    double speed_max = 20.0;
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -77,16 +82,16 @@ int main()
 		{ steer_value = -1.0; }
 	  }
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+//           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
 	  if ( speed_max < speed )
-	    {msgJson["throttle"] = 0.0;}
+	    {	msgJson["throttle"] = 0.0;}
 	  else
-	    {msgJson["throttle"] = 0.3;}
+	    {	msgJson["throttle"] = 0.3;}
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+//           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {

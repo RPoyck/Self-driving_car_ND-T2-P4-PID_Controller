@@ -34,10 +34,42 @@ void PID::Init(double Kp, double Ki, double Kd)
     if (this->with_twiddle)
     {
 	this->it = 0;
-	this->previous_try = 0;
-	this->current_p = -1;
-	this->p = {0.0, 0.0, 0.0};
-	this->dp = {1.0, 1.0, 1.0};
+	// Number of steps since last parameter change //
+	this->twiddle_step = 0;
+	// Number of steps in between parameter changes //
+	this->twiddle_steps = 50;
+	// Sum of cte's in between parameter changes //
+	this->cte_sum = 0;
+	
+// 	this->p = {0.0, 0.0, 0.0};
+// 	this->p = {3.2, 3.0, 3.0};
+// 	this->p = {3.25, 3.1, 3.1};
+// 	this->p = {3.29, 3.16 , 3.16};
+// 	this->p = {0.29, 0.16 , 0.16};
+// 	this->p = {0.29, 0.16 , 0.16};
+// 	this->p = {0.29, 0.0 , 0.0};
+// 	this->p = {0.46, 0.0 , 0.0};
+// 	this->p = {0.46, 0.0 , 0.115};
+// 	this->p = {0.46, 0.0115 , 0.115};
+// 	this->p = {0.46, 0.027 , 0.115};
+// 	this->p = {0.46, 0.0 , 0.115};
+// 	this->p = {0.46, 0.0016 , 0.115};
+// 	this->p = {0.26, 0.0016 , 0.115};
+// 	this->p = {0.05, 0.0 , 0.0};
+	this->p = {Kp, Ki, Kd};
+	
+// 	this->dp = {1.0, 1.0, 1.0};
+// 	this->dp = {0.1, 0.1, 0.1};
+// 	this->dp = {0.01, 0.01, 0.01};
+// 	this->dp = {0.01, 0.001, 0.01};
+// 	this->dp = {0.01, 0.0, 0.0};
+// 	this->dp = {0.0, 0.0, 0.01};
+// 	this->dp = {0.0, 0.001, 0.0};
+// 	this->dp = {0.0, 0.0001, 0.0};
+// 	this->dp = {0.05, 0.0, 0.0};
+// 	this->dp = {0.0, 0.0, 0.01};
+// 	this->dp = {0.01, 0.01, 0.01};
+	this->dp = {0.01, 0.001, 0.1};
     }
 }
 
@@ -47,74 +79,85 @@ void PID::UpdateError(double cte)
 
     if (this->with_twiddle)
     {
-	
-	// For the first iteration, initialise the cte_best parameter //
-	if (this->it == 0)
-	{
-	    this->cte_best = cte;
-	    this->current_p = (this->current_p + 1) % 3;
-	    this->previous_try = 1;
-	    this->p[this->current_p] += this->dp[this->current_p];
-	}
-	// Check which parameter optimisation direction was chosen the previous run, if any //
-	else
-	{
-	    // The last iteration increased the parameter //
-	    if (this->previous_try == 1)
+	if (this->twiddle_steps <= this->twiddle_step)
+	{   
+	    this->cte_sum += cte;
+	    
+	    // For the first iteration, initialise the cte_best parameter //
+	    if (this->it == 0)
 	    {
-		// If increasing the parameter improved the result //
-		if (cte < this->cte_best)
-		{
-		    this->cte_best = cte;
-		    this->dp[this->current_p] *= 1.1;
-		    
-		    this->current_p = (this->current_p + 1) % 3;
-		    this->previous_try = 1;
-		    this->p[this->current_p] += this->dp[this->current_p];
-		}
-		// If increasing the parameter deteriorated the result //
-		else
-		{
-		    this->p[this->current_p] -= 2 * this->dp[this->current_p];
-		    this->previous_try = -1;
-		}	
+		this->cte_best = this->cte_sum;
+		this->current_p = 0;
+		this->previous_try = 1;
+		this->p[this->current_p] += this->dp[this->current_p];
 	    }
-	    else 
-	    {   
-		// The last iteration decreased the parameter //
-		if (previous_try == -1)
+	    // Check which parameter optimisation direction was chosen the previous run, if any //
+	    else
+	    {
+		// The last iteration increased the parameter //
+		if (this->previous_try == 1)
 		{
-		    // If decreasing the parameter improved the result //
-		    if (cte < this->cte_best)
+		    // If increasing the parameter improved the result //
+		    if (this->cte_sum < this->cte_best)
 		    {
-			this->cte_best = cte;
+			this->cte_best = this->cte_sum;
 			this->dp[this->current_p] *= 1.1;
 			
 			this->current_p = (this->current_p + 1) % 3;
 			this->previous_try = 1;
 			this->p[this->current_p] += this->dp[this->current_p];
 		    }
-		    // If decreasing the parameter deteriorated the result //
+		    // If increasing the parameter deteriorated the result //
 		    else
 		    {
-			// Revert the parameter back to the original value //
-			this->p[this->current_p] += this->dp[this->current_p];
-			this->dp[this->current_p] *= 0.9;
-			
-			this->current_p = (this->current_p + 1) % 3;
-			this->previous_try = 1;
-			this->p[this->current_p] += this->dp[this->current_p];
+			this->p[this->current_p] -= 2 * this->dp[this->current_p];
+			this->previous_try = -1;
+		    }	
+		}
+		else 
+		{   
+		    // The last iteration decreased the parameter //
+		    if (previous_try == -1)
+		    {
+			// If decreasing the parameter improved the result //
+			if (this->cte_sum < this->cte_best)
+			{
+			    this->cte_best = this->cte_sum;
+			    this->dp[this->current_p] *= 1.1;
+			    
+			    this->current_p = (this->current_p + 1) % 3;
+			    this->previous_try = 1;
+			    this->p[this->current_p] += this->dp[this->current_p];
+			}
+			// If decreasing the parameter deteriorated the result //
+			else
+			{
+			    // Revert the parameter back to the original value //
+			    this->p[this->current_p] += this->dp[this->current_p];
+			    this->dp[this->current_p] *= 0.9;
+			    
+			    this->current_p = (this->current_p + 1) % 3;
+			    this->previous_try = 1;
+			    this->p[this->current_p] += this->dp[this->current_p];
+			}
 		    }
 		}
 	    }
+	    
+	    this->Kp = this->p[0];
+	    this->Ki = this->p[1];
+	    this->Kd = this->p[2];
+	    std::cout << "Kp: " << this->Kp << ", Ki: " << this->Ki << ", Kd: " << this->Kd  << "\n";
+	    this->it++;
+	    
+	    this->twiddle_step = 0;
+	    this->cte_sum = 0;
+	}
+	else
+	{
+	    this->twiddle_step++;
 	}
 	
-	this->Kp = this->p[0];
-	this->Ki = this->p[1];
-	this->Kd = this->p[2];
-	std::cout << "Kp: " << this->Kp << ", Ki: " << this->Ki << ", Kd: " << this->Kd  << "\n";
-	
-	this->it++;
 	
     } // End of using twiddle //
     
@@ -130,7 +173,7 @@ void PID::UpdateError(double cte)
     this->cte_prev = cte;
     
     // Integral error //
-    this->d_error += cte;
+    this->i_error += cte;
     
     
     

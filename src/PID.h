@@ -30,6 +30,9 @@ public:
     int current_p;
     std::vector<double> p;
     std::vector<double> dp;
+    unsigned int twiddle_step;
+    unsigned int twiddle_steps;
+    double cte_sum;
     
 //     std::vector<double> dp;
 //     double tolerance = 0.01;
