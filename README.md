@@ -3,6 +3,44 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+# Reflection
+
+The following image taken from one of the results of the quizzes illustrates the function of each component of the PID controller.  
+![PID components]https://github.com/RPoyck/Self-driving_car_ND-T2-P4-PID_Controller/Images/PID_components.png "PID components")  
+The following sections will discuss the individual impact of each of these components and will go into how the values of these components were chosen in the project.  
+
+## P-component
+The proportional (P) controller will increase/decrease the control parameter purely based on the instantaneous difference between the current state and the desired state (the error). 
+Since the desired state in this case is a Cross-Track Error (CTE) of 0 and the control parameter is the steering angle, decreasing the steering angle to 0 at CTE = 0 does not say anything about the heading of the vehicle.
+This will cause such a regulator to oscillate around the CTE = 0.  
+A larger value will result in more aggressive steering behaviour and therefore a shorter period of the oscillation.
+A lower value however will cause the vehicle to not being able to reach the goal in time and possibly cause it to get off track.  
+
+Therefore this parameter was initiated first and its value was tweaked with an adaptation of the twiddle algorithm to produce a stable oscillation around the lane centreline.
+
+Final value: *0.1241*  
+
+## D-component
+In order to dampen these oscillations the Differential (D) component of the controller is used. 
+If the CTE is already being reduced compared to the previous step the control parameter (steering angle) can already be reduced in order to prevent overshooting when reaching the target.  
+Therefore this parameter was tuned secondly to in the end produce a stable as possible path with as little as possible oscillations while still reaching the goal to be as close to CTE=0 as possible.  
+
+Final value: *0.39*  
+
+## I-component
+The Integral (I) component uses the time integral / sum of the CTE in order to lose any systematic bias, 
+i.e. a constant offset between the ordered control value and the actually resulting value of the control parameter.  
+This parameter was tuned with twiddle last in order to get a resulting path which is close enough to the desired driving lane centreline.  
+
+Final value: *0.00027*  
+
+## Parameter tuning improvement
+It would be better to have the entire desired track of the simulation inside a closed loop which can be run at increased speed, around which the twiddle, or a different optimisation algorithm can feed it with different parameter values.  
+One of the shortcomings now is that the entire optimisation algorithm should be stopped as soon as one of the loops iterations has caused the vehicle to steer off track.
+The closed loop solution would only render one loop iteration invalid and directly move on to the next solution.
+
+# Repository as described by Udacity
+
 ## Dependencies
 
 * cmake >= 3.5
