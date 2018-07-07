@@ -6,7 +6,7 @@ Self-Driving Car Engineer Nanodegree Program
 # Reflection
 
 The following image taken from one of the results of the quizzes illustrates the function of each component of the PID controller.  
-![PID components]https://github.com/RPoyck/Self-driving_car_ND-T2-P4-PID_Controller/Images/PID_components.png "PID components")  
+![PID components](https://github.com/RPoyck/Self-driving_car_ND-T2-P4-PID_Controller/blob/master/Images/PID_components.png "PID components")  
 The following sections will discuss the individual impact of each of these components and will go into how the values of these components were chosen in the project.  
 
 ## P-component
