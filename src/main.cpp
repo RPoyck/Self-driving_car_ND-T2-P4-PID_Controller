@@ -48,7 +48,6 @@ int main()
   
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
-    // TODO remove this //
     double speed_max = 20.0;
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message

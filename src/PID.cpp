@@ -183,25 +183,3 @@ void PID::UpdateError(double cte)
 double PID::TotalError() {
     return 0.0;
 }
-
-
-// void PID::Twiddle(double tolerance)
-// {
-//     // Initialise the twiddle parameters //
-//     std::vector<double> p = {this->Kp, this->Ki, this->Kd};
-//     std::vector<double> dp = {0.1, 0.1, 0.1};
-//     std::vector<double> error_best = {this->p_error, this->d_error, this->i_error};
-// //     int it = 0;
-//     while ( tolerance < (p[0]+p[1]+p[2]) )
-//     {
-// // 	it++;
-// 	for (int i=0; i<p.length(); i++)
-// 	{
-// 	    p[i] += dp[i];
-// 	    PID param_tester;
-// 	    param_tester.Init(p[0], p[1], p[2], this->p_error, this->d_error, this->i_error, this->cte_prev);
-// 	    if 
-// 	}
-//     }
-//     
-// }
